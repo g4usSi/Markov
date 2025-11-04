@@ -8,48 +8,55 @@
 </head>
 <body>
     <div class="container">
-        <h1>Cadena de Markov - Plataforma Educativa Virtual</h1>
-        
-        <div class="input-section">
-            <h2>Configuración</h2>
-            
-            <div class="form-group">
-                <label>Estados (separados por coma):</label>
-                <input type="text" id="states" value="Activo,Inactivo,Desconectado">
+        <div class="main-content">
+            <h1>Cadena de Markov - Plataforma Educativa Virtual</h1>
+
+            <div class="input-section">
+                <h2>Configuración</h2>
+
+                <div class="form-group">
+                    <label>Estados (separados por coma):</label>
+                    <input type="text" id="states" value="Activo,Inactivo,Desconectado">
+                </div>
+
+                <div class="form-group">
+                    <label>Estado Inicial:</label>
+                    <select id="initialState">
+                        <option value="0">Activo</option>
+                        <option value="1">Inactivo</option>
+                        <option value="2">Desconectado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Número de Pasos (n):</label>
+                    <input type="number" id="steps" value="5" min="1" max="20">
+                </div>
+
+                <h3>Matriz de Transición (P)</h3>
+                <div id="matrixContainer"></div>
+
+                <button onclick="calculate()">Calcular P^n</button>
             </div>
-            
-            <div class="form-group">
-                <label>Estado Inicial:</label>
-                <select id="initialState">
-                    <option value="0">Activo</option>
-                    <option value="1">Inactivo</option>
-                    <option value="2">Desconectado</option>
-                </select>
+
+            <div id="results" class="results-section" style="display:none;">
+                <h2>Resultados</h2>
+
+                <div class="result-box">
+                    <h3>Matriz P^n</h3>
+                    <table id="resultMatrix"></table>
+                </div>
+
+                <div class="result-box">
+                    <h3>Probabilidades después de n pasos</h3>
+                    <table id="probTable"></table>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label>Número de Pasos (n):</label>
-                <input type="number" id="steps" value="5" min="1" max="20">
-            </div>
-            
-            <h3>Matriz de Transición (P)</h3>
-            <div id="matrixContainer"></div>
-            
-            <button onclick="calculate()">Calcular P^n</button>
         </div>
-        
-        <div id="results" class="results-section" style="display:none;">
-            <h2>Resultados</h2>
-            
-            <div class="result-box">
-                <h3>Matriz P^n</h3>
-                <table id="resultMatrix"></table>
-            </div>
-            
-            <div class="result-box">
-                <h3>Probabilidades después de n pasos</h3>
-                <table id="probTable"></table>
-            </div>
+
+        <div class="notifications-sidebar">
+            <h3>Notificaciones del Sistema</h3>
+            <div id="notificationArea"></div>
         </div>
     </div>
 
@@ -60,11 +67,42 @@
             [0.1, 0.1, 0.8]
         ];
 
+        function showNotification(message, type) {
+            const notificationArea = document.getElementById('notificationArea');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+
+            // Agregar botón de cerrar
+            notification.innerHTML = `
+                ${message}
+                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+            `;
+
+            notificationArea.appendChild(notification);
+
+            // Auto-eliminar después de 8 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 500);
+                }
+            }, 8000);
+        }
+
         function createMatrix() {
             const states = document.getElementById('states').value.split(',').map(s => s.trim());
             const n = states.length;
             const container = document.getElementById('matrixContainer');
             container.innerHTML = '';
+
+            if (n < 1) {
+                showNotification('Por favor, ingresa al menos un estado', 'warning');
+                return;
+            }
 
             let html = '<table class="matrix-input">';
             html += '<tr><th>De/A</th>';
@@ -74,14 +112,17 @@
             for (let i = 0; i < n; i++) {
                 html += `<tr><th>${states[i]}</th>`;
                 for (let j = 0; j < n; j++) {
-                    html += `<td><input type="number" step="0.01" min="0" max="1" 
-                             id="cell_${i}_${j}" value="${defaultMatrix[i][j]}" 
+                    const value = (defaultMatrix[i] && defaultMatrix[i][j]) || (1/n).toFixed(2);
+                    html += `<td><input type="number" step="0.01" min="0" max="1"
+                             id="cell_${i}_${j}" value="${value}"
                              onchange="validateRow(${i})"></td>`;
                 }
                 html += '</tr>';
             }
             html += '</table>';
             container.innerHTML = html;
+
+            showNotification(`Matriz creada con ${n} estados`, 'info');
         }
 
         function validateRow(row) {
@@ -92,7 +133,9 @@
                 sum += parseFloat(cell.value) || 0;
             }
             if (!isNaN(sum) && Math.abs(sum - 1.0) > 0.001) {
-                console.warn(`Fila ${row} suma ${sum.toFixed(3)}, debe sumar 1.0`);
+                showNotification(`Fila ${row} suma ${sum.toFixed(3)}, debe sumar 1.0`, 'warning');
+            } else {
+                showNotification(`Fila ${row} validada correctamente`, 'success');
             }
         }
 
@@ -118,7 +161,20 @@
             const steps = document.getElementById('steps').value;
             const states = document.getElementById('states').value.split(',').map(s => s.trim());
 
+            // Validación básica
+            if (states.length < 1) {
+                showNotification('Debe haber al menos un estado definido', 'warning');
+                return;
+            }
+
+            if (steps < 1 || steps > 20) {
+                showNotification('El número de pasos debe estar entre 1 y 20', 'warning');
+                return;
+            }
+
             try {
+                showNotification('Calculando...', 'info');
+
                 const response = await fetch('/calculate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -134,11 +190,12 @@
 
                 if (result.success) {
                     displayResults(result.P_n, result.probabilities, result.states);
+                    showNotification('Cálculo completado exitosamente', 'success');
                 } else {
-                    alert('Error: ' + result.error);
+                    showNotification('Error en el cálculo: ' + result.error, 'warning');
                 }
             } catch (error) {
-                alert('Error: ' + error);
+                showNotification('Error de conexión: ' + error, 'warning');
             }
         }
 
@@ -160,7 +217,8 @@
             // Mostrar probabilidades finales
             let probHtml = '<tr><th>Estado</th><th>Probabilidad</th><th>Porcentaje</th></tr>';
             probs.forEach((p, i) => {
-                probHtml += `<tr><td>${states[i]}</td><td>${p.toFixed(4)}</td><td>${(p*100).toFixed(2)}%</td></tr>`;
+                const percentage = (p * 100).toFixed(2);
+                probHtml += `<tr><td>${states[i]}</td><td>${p.toFixed(4)}</td><td>${percentage}%</td></tr>`;
             });
             document.getElementById('probTable').innerHTML = probHtml;
 

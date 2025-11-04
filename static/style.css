@@ -5,35 +5,59 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a2a6c 0%, #2a4365 100%);
     min-height: 100vh;
     padding: 20px;
+    color: #333;
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
-    background: white;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+.main-content {
+    background: #f8fafc;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
 }
 
+.notifications-sidebar {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 20px;
+}
+
 h1 {
-    color: #333;
+    color: #1a365d;
     margin-bottom: 30px;
     text-align: center;
+    font-size: 28px;
+    border-bottom: 2px solid #2d3748;
+    padding-bottom: 15px;
 }
 
 h2, h3 {
-    color: #667eea;
+    color: #2d3748;
     margin-top: 20px;
     margin-bottom: 15px;
 }
 
 .input-section {
     margin-bottom: 30px;
+    background: #edf2f7;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3182ce;
 }
 
 .form-group {
@@ -44,7 +68,7 @@ label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
-    color: #333;
+    color: #2d3748;
 }
 
 input[type="text"],
@@ -52,38 +76,56 @@ input[type="number"],
 select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #cbd5e0;
     border-radius: 5px;
     font-size: 14px;
+    background: white;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #3182ce;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
 }
 
 .matrix-input {
     width: 100%;
     margin: 15px 0;
     border-collapse: collapse;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .matrix-input th,
 .matrix-input td {
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #cbd5e0;
     text-align: center;
 }
 
 .matrix-input th {
-    background: #667eea;
+    background: #2d3748;
     color: white;
 }
 
 .matrix-input input {
     width: 100%;
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #cbd5e0;
     border-radius: 3px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.matrix-input input:focus {
+    border-color: #3182ce;
+    outline: none;
 }
 
 button {
-    background: #667eea;
+    background: #3182ce;
     color: white;
     padding: 12px 30px;
     border: none;
@@ -91,45 +133,144 @@ button {
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.2s;
     width: 100%;
+    margin-top: 10px;
 }
 
 button:hover {
-    background: #764ba2;
+    background: #2c5aa0;
+    transform: translateY(-2px);
 }
 
 .results-section {
     margin-top: 30px;
     padding-top: 30px;
-    border-top: 2px solid #667eea;
+    border-top: 2px solid #3182ce;
 }
 
 .result-box {
     margin: 20px 0;
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 5px;
+    background: #edf2f7;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3182ce;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin: 15px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 table th,
 table td {
     padding: 12px;
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid #cbd5e0;
 }
 
 table th {
-    background: #667eea;
+    background: #2d3748;
     color: white;
 }
 
 table tr:nth-child(even) {
-    background: #f0f0f0;
+    background: #e2e8f0;
+}
+
+.notification {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    font-weight: bold;
+    border-left: 5px solid;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: slideInRight 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+.notification.success {
+    background-color: #f0fff4;
+    color: #2d7d4b;
+    border-left-color: #38a169;
+}
+
+.notification.warning {
+    background-color: #fff5f5;
+    color: #c53030;
+    border-left-color: #e53e3e;
+}
+
+.notification.info {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    border-left-color: #3182ce;
+}
+
+.notifications-sidebar h3 {
+    text-align: center;
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.fade-out {
+    animation: slideOutRight 0.5s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Estilos para el botón de cerrar notificación */
+.notification-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.notification-close:hover {
+    opacity: 1;
 }
