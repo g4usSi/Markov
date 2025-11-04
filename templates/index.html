@@ -51,6 +51,14 @@
                     <h3>Probabilidades después de n pasos</h3>
                     <table id="probTable"></table>
                 </div>
+
+                <!-- NUEVA SECCIÓN PARA EL GRAFO DE MARKOV -->
+                <div class="result-box">
+                    <h3>Grafo de la Cadena de Markov</h3>
+                    <div id="graphContainer">
+                        <img id="markovGraph" src="" alt="Grafo de Markov" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -189,7 +197,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    displayResults(result.P_n, result.probabilities, result.states);
+                    displayResults(result.P_n, result.probabilities, result.states, result.markov_graph);
                     showNotification('Cálculo completado exitosamente', 'success');
                 } else {
                     showNotification('Error en el cálculo: ' + result.error, 'warning');
@@ -199,7 +207,7 @@
             }
         }
 
-        function displayResults(P_n, probs, states) {
+        function displayResults(P_n, probs, states, graphImage) {
             // Mostrar matriz P^n
             let matrixHtml = '<tr><th>De/A</th>';
             states.forEach(s => matrixHtml += `<th>${s}</th>`);
@@ -221,6 +229,11 @@
                 probHtml += `<tr><td>${states[i]}</td><td>${p.toFixed(4)}</td><td>${percentage}%</td></tr>`;
             });
             document.getElementById('probTable').innerHTML = probHtml;
+
+            // Mostrar el grafo de Markov
+            if (graphImage) {
+                document.getElementById('markovGraph').src = graphImage;
+            }
 
             document.getElementById('results').style.display = 'block';
         }
